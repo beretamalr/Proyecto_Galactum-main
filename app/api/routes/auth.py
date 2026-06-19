@@ -21,11 +21,14 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
         
     except Exception as e:
         # Si el servicio lanza una excepción (ej: email duplicado), la capturamos
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(
+            status_code=409,
+            detail="El correo ya está registrado"
+        )
 
     return TokenResponse(
-        status="success",
-        message="User registered successfully.",
+        status="Accepted",
+        message="Usuario registrado exitosamente.",
         token=token
     )
 
@@ -34,13 +37,16 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     # La lógica de autenticación se mueve al servicio
     user = auth_service.authenticate_user(db, email=payload.email, password=payload.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid username or password.")
+        raise HTTPException(
+            status_code=401,
+            detail="Correo o contraseña inválidos."
+        )
 
     token = auth_service.create_access_token({"sub": user.email})
 
     return TokenResponse(
-        status="success",
-        message="Login successful.",
+        status="Accepted",
+        message="Inicio de sesión exitoso.",
         token=token
     )
 
